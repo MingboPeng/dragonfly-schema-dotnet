@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
@@ -23,7 +23,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="HoneybeeSchema" Version="1.53.1.5" />
+    <PackageReference Include="HoneybeeSchema" Version="1.53.2.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
