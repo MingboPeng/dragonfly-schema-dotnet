@@ -3,7 +3,7 @@
   "servers": [],
   "info": {
     "description": "Documentation for Dragonfly model schema",
-    "version": "2.2.6",
+    "version": "2.2.7",
     "title": "Dragonfly Model Schema",
     "contact": {
       "name": "Ladybug Tools",
@@ -11160,6 +11160,24 @@
                 "$ref": "#/components/schemas/PTACEquipmentType",
                 "default": "PTAC_ElectricBaseboard",
                 "description": "Text for the specific type of system equipment from the PTACEquipmentType enumeration."
+              },
+              "sensible_heat_recovery": {
+                "default": 0,
+                "description": "A number between 0 and 1 for the effectiveness of sensible heat recovery within the system. When this is not zero, heat recovery is modeled using an ERV connected to the PTAC.",
+                "maximum": 1,
+                "minimum": 0,
+                "title": "Sensible Heat Recovery",
+                "type": "number",
+                "format": "double"
+              },
+              "latent_heat_recovery": {
+                "default": 0,
+                "description": "A number between 0 and 1 for the effectiveness of latent heat recovery within the system. When this is not zero, heat recovery is modeled using an ERV connected to the PTAC.",
+                "maximum": 1,
+                "minimum": 0,
+                "title": "Latent Heat Recovery",
+                "type": "number",
+                "format": "double"
               }
             },
             "additionalProperties": false
@@ -12175,14 +12193,6 @@
                 "default": "Floor",
                 "description": "Text to indicate which faces are thermally active by default. Note that this property has no effect when the rooms to which the HVAC system is assigned have constructions with internal source materials. In this case, those constructions will dictate the thermally active surfaces."
               },
-              "minimum_operation_time": {
-                "default": 1.0,
-                "description": "A number for the minimum number of hours of operation for the radiant system before it shuts off.",
-                "exclusiveMinimum": 0,
-                "title": "Minimum Operation Time",
-                "type": "number",
-                "format": "double"
-              },
               "switch_over_time": {
                 "default": 24.0,
                 "description": "A number for the minimum number of hours for when the system can switch between heating and cooling.",
@@ -12252,14 +12262,6 @@
                 "$ref": "#/components/schemas/RadiantFaceTypes",
                 "default": "Floor",
                 "description": "Text to indicate which faces are thermally active by default. Note that this property has no effect when the rooms to which the HVAC system is assigned have constructions with internal source materials. In this case, those constructions will dictate the thermally active surfaces."
-              },
-              "minimum_operation_time": {
-                "default": 1.0,
-                "description": "A number for the minimum number of hours of operation for the radiant system before it shuts off.",
-                "exclusiveMinimum": 0,
-                "title": "Minimum Operation Time",
-                "type": "number",
-                "format": "double"
               },
               "switch_over_time": {
                 "default": 24.0,
@@ -17691,6 +17693,45 @@
             "type": "object",
             "required": [],
             "properties": {
+              "unit_ventilators": {
+                "default": false,
+                "description": "Boolean to note whether individual zone ventilators are included with the basic heating and cooling system (True) or the system only performs heating and cooling without any ventilation (False). Unlike a DOAS, unit ventilators do not pass the outdoor air through heating or cooling coils to condition it for the space. However, heat recovery effectiveness can be specified, which can temper the air supplied to the zone by the ventilator with exhaust air. All air flow through this ventilator is always balanced for each zone between supply and exhaust and the total flow rate is determined by checking the ventilation and exhaust requirements of the rooms to which the system is assigned.",
+                "title": "Unit Ventilators",
+                "type": "boolean"
+              },
+              "sensible_heat_recovery": {
+                "default": 0,
+                "description": "A number between 0 and 1 for the effectiveness of sensible heat recovery within unit ventilators if specified.",
+                "maximum": 1,
+                "minimum": 0,
+                "title": "Sensible Heat Recovery",
+                "type": "number",
+                "format": "double"
+              },
+              "latent_heat_recovery": {
+                "default": 0,
+                "description": "A number between 0 and 1 for the effectiveness of latent heat recovery within unit ventilators if specified.",
+                "maximum": 1,
+                "minimum": 0,
+                "title": "Latent Heat Recovery",
+                "type": "number",
+                "format": "double"
+              },
+              "vent_availability_schedule": {
+                "anyOf": [
+                  {
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "An optional On/Off discrete schedule to specify when unit ventilators shut off (assuming that the unit_ventilators is True). This will not only reduce heating and cooling load by preventing outdoor air from flowing but will also shut off the fans, which can result in more energy savings when spaces served by the ventilators are completely unoccupied. If None, the unit ventilators will be always on.",
+                "title": "Vent Availability Schedule"
+              },
               "type": {
                 "title": "Type",
                 "default": "_HeatCoolBase",
@@ -17702,7 +17743,7 @@
             "additionalProperties": false
           }
         ],
-        "description": "Base class for all heating/cooling systems without any ventilation.\n\nThese systems are only designed to satisfy heating + cooling demand and they\ncannot meet any minimum ventilation requirements.\n\nAs such, these systems tend to be used in residential or storage settings where\nmeeting minimum ventilation requirements may not be required or the density\nof occupancy is so low that infiltration is enough to meet fresh air demand.",
+        "description": "Base class for all heating/cooling systems without ventilation.\n\nThese systems are only designed to satisfy heating + cooling demand and,\nby default, they cannot meet minimum ventilation requirements. However,\noptional unit ventilators can be included, which provide ventilation through\na balanced intake and exhaust ventilation on a zone-by-zone basis. Unlike a\nDOAS, unit ventilators do not pass the outdoor air through heating or cooling\ncoils to condition it for the space. However, heat recovery effectiveness\ncan be specified, which can temper the air supplied to the zone with exhaust air.\n\nThese systems tend to be used in residential or hospitality settings where\nmeeting minimum ventilation requirements may not be required as the density\nof occupancy is so low that infiltration is enough to meet fresh air needs.\nOr occupancy is so variable that supplying ventilation to each room with\nseparate unit ventilators is a worthwhile approach.\n\nThese systems are also common in warehouse or storage settings where ventilation\nmay not be necessary.",
         "title": "_HeatCoolBase",
         "discriminator": {
           "propertyName": "type"
